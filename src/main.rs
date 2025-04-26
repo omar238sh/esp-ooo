@@ -23,22 +23,17 @@ fn main() {
 
     let mut ssid: String<32> = String::new();
     let mut password: String<64> = String::new();
-    ssid.push_str("hoh").unwrap();
-    password.push_str("19691224").unwrap();
-    let ap_config = Configuration::Client(ClientConfiguration {
+    ssid.push_str("esp32 ooo").unwrap();
+    password.push_str("01000000").unwrap();
+    let ap_config = Configuration::AccessPoint(AccessPointConfiguration {
         ssid,
         password,
+        channel: 1,
         ..Default::default()
     });
     wifi.set_configuration(&ap_config).unwrap();
     wifi.start().unwrap();
-    wifi.connect().unwrap();
-
-    while !wifi.is_connected().unwrap() {
-        std::thread::sleep(std::time::Duration::from_millis(500));
-    }
-    println!("✅ Connected to Wi-Fi!");
-
+    println!("✅ Access Point Started! Connect to Wi-Fi network: ESP32-Control");
     let mut pin2 = PinDriver::output(p.pins.gpio2).unwrap();
     let mut pin3 = PinDriver::output(p.pins.gpio4).unwrap();
     let mut pin4 = PinDriver::output(p.pins.gpio16).unwrap();
@@ -51,7 +46,8 @@ fn main() {
     let mut pin11 = PinDriver::output(p.pins.gpio1).unwrap();
     let listener = TcpListener::bind("0.0.0.0:5351").unwrap();
     println!("📡 TCP server listening on port 5351");
-
+    let ip_info = wifi.ap_netif().get_ip_info().unwrap();
+    println!("📡 ESP32 Access Point IP Address: {}", ip_info.ip);
     for stream_result in listener.incoming() {
         match stream_result {
             Ok(mut stream) => {
@@ -121,7 +117,6 @@ fn main() {
                             pin11.set_low().unwrap();
                         }
                         _ => {
-                            // أمر غير معروف
                             println!("Unknown command: {}", received);
                         }
                     }
