@@ -29,6 +29,7 @@ fn main() {
         ssid,
         password,
         channel: 1,
+        auth_method: AuthMethod::WPA2Personal,
         ..Default::default()
     });
     wifi.set_configuration(&ap_config).unwrap();
